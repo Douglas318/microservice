@@ -2,10 +2,11 @@ from src.infra.db.settings.connection import DBConnectionHandler
 from src.infra.db.entities.users import Users as UsersEntity
 from src.domain.models.users import Users
 from typing import List
+from sqlalchemy.sql import exists, select
+import hashlib
 
 
 class UsersRepository:
-
     @classmethod
     def select_users(cls) -> List[Users] | List:
         with DBConnectionHandler() as db:
@@ -18,15 +19,15 @@ class UsersRepository:
                 raise exception
 
     @classmethod
-    def select_user(cls, cpf: str) -> Users | None:
+    def select_user(cls, user_id: int) -> Users | None:
         with DBConnectionHandler() as db:
             try:
                 user = (
                     db.session.query(UsersEntity)
-                    .filter(UsersEntity.cpf == cpf)
+                    .filter(UsersEntity.id == user_id)
                     .first()
                 )
-                return user if user else None
+                return user
 
             except Exception as exception:
                 db.session.rollback()
@@ -75,7 +76,7 @@ class UsersRepository:
             try:
                 user = (
                     db.session.query(UsersEntity)
-                    .filter(UsersEntity.user_id == user_id)
+                    .filter(UsersEntity.id == user_id)
                     .delete()
                 )
                 db.session.commit()
@@ -85,4 +86,20 @@ class UsersRepository:
                 raise exception
 
 
+    @classmethod
+    def get_user_by_cpf(cls, cpf: str) -> bool:
+        with DBConnectionHandler() as db:
+            try:
+                hashed_cpf = hashlib.sha256(cpf.encode()).hexdigest()
+                print(hashed_cpf)
+                user = (
+                    db.session.query(
+                        exists()
+                        .where(UsersEntity.cpf == hashed_cpf)
+                    ).scalar()
+                )
+                return user
 
+            except Exception as exception:
+                db.session.rollback()
+                raise exception
