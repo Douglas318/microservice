@@ -9,9 +9,9 @@ class UsersFinder(UsersFinderInterface):
     def __init__(self, users_repository: UsersRepositoryInterface) -> None:
         self.__users_repository = users_repository
 
-    def listing(self) -> Dict:
+    def users_finder(self) -> Dict:
         users = self.__search_users()
-        response = self.__format_response(user=users)
+        response = self.__format_response(users=users)
         return response
 
     def __search_users(self) -> List[Users]:
@@ -21,11 +21,19 @@ class UsersFinder(UsersFinderInterface):
         raise HttpBadRequestError("Usuarios não encontrados")
 
     @classmethod
-    def __format_response(cls, users: Users) -> Dict:
+    def __format_response(cls, users: List[Users]) -> Dict:
+        users_values = []
+        for user in users:
+            users_values.append({
+                "name": user.name,
+                "cpf": user.cpf,
+                "email": user.email,
+                "phone_number": user.phone_number
+            })
         response = {
             "type": "Users",
             "message": "Usuarios encontrados com sucesso!",
-            "users": users,
+            "users": users_values
         }
 
         return response

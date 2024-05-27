@@ -91,7 +91,6 @@ class UsersRepository:
         with DBConnectionHandler() as db:
             try:
                 hashed_cpf = hashlib.sha256(cpf.encode()).hexdigest()
-                print(hashed_cpf)
                 user = (
                     db.session.query(
                         exists()

@@ -16,7 +16,6 @@ class UserCreate(UserCreateInterface):
 
     def __validate_user(self, cpf: str) -> None:
         user = self.__users_repository.get_user_by_cpf(cpf=cpf)
-        print(user)
         if user: raise HttpConflictError("O usuario informado já existe")
 
     def __create_user(self, name: str, cpf: str, email: str, phone_number: str) -> None:
