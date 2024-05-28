@@ -1,19 +1,26 @@
-from celery import shared_task
+from celery import Celery, shared_task
 import pika
 import os
 
-from celery import Celery
-
 app = Celery('tasks', broker=os.getenv("RABBITMQ_QUEUE"))
-@shared_task
-def send_message_to_queue(message):
-    cconnection = pika.BlockingConnection(pika.URLParameters(app.conf.broker_url))
-    channel = connection.channel()
-    channel.queue_declare(queue=os.getenv("QUEUE_NAME"))
-    channel.basic_publish(
-        exchange=os.getenv("EXCHANGE_NAME"),
-        routing_key=os.getenv("QUEUE_NAME"),
-        body=message
-    )
-    print(message)
-    connection.close()
+
+@app.task(bind=True)
+def send_message_to_queue(self, message):
+    try:
+        connection = pika.BlockingConnection(pika.URLParameters(os.getenv("RABBITMQ_QUEUE")))
+        channel = connection.channel()
+        
+        channel.queue_declare(queue='celery', durable=True)
+        
+        channel.basic_publish(
+            exchange='celery',
+            routing_key='celery',
+            body=message,
+            properties=pika.BasicProperties(
+                delivery_mode=2,
+            )
+        )
+        connection.close()
+    except Exception as exception:
+        print(f"[ERROR] - RABBITMQ EXCEPTION - {str(exception)}")
+        raise self.retry(exc=error, countdown=10, max_retries=3)

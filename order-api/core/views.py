@@ -4,8 +4,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
-from .serializers import *
-from core.publisher.message_publisher import send_message_to_queue
+
+from core.serializers import *
 
 
 @api_view(['GET'])

@@ -145,4 +145,4 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=5),
 }
 
-
+USERS_URL="http://localhost:5000"
