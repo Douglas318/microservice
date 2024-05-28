@@ -16,7 +16,7 @@ class UserFinder(UserFinderInterface):
 
     def __search_user(self, user_id: int) -> Users:
         user = self.__users_repository.select_user(user_id=user_id)
-        if user == []:
+        if user is None:
             raise HttpBadRequestError("Usuario não encontrado")
         return user
         
