@@ -47,6 +47,6 @@ def delete_order(request: Request) -> Response:
     order = Orders.objects.filter(id=request.query_params.get("order_id"))
     if order.exists():
         order.delete()
-        return Response({"message": "Pedido apagado com sucesso!"}, status=status.HTTP_200_OK)
-    return Response({"message": "Pedido não encontrado"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
