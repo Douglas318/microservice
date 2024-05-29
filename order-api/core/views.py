@@ -6,20 +6,30 @@ from rest_framework.request import Request
 from rest_framework import status
 
 from core.serializers import *
+from django.core.cache import cache
+
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def list_orders(request: Request) -> Response:
-    orders = Orders.objects
+    orders = cache.get('orders')
+    if not orders:
+        orders = Orders.objects.all()
+        cache.set('orders', orders, 300)
+
     return Response(OrdersSerializer(orders, many=True).data, status=status.HTTP_200_OK)
+    
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def display_order(request: Request) -> Response:
-    order = get_object_or_404(Orders, id=request.query_params.get("order_id"))
-    serializer = OrdersSerializer(order, many=False)
+    order = orders = cache.get('order')
+    if not order:
+        order = get_object_or_404(Orders, id=request.query_params.get("order_id"))
+        serializer = OrdersSerializer(order, many=False)
+        cache.set('orders', order, 300)
     return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
@@ -49,4 +59,3 @@ def delete_order(request: Request) -> Response:
         order.delete()
         return Response(status=status.HTTP_200_OK)
     return Response(status=status.HTTP_400_BAD_REQUEST)
-

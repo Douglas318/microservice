@@ -1,6 +1,18 @@
 version: '2'
 services:
-    redis_order:
-        image: sickp/alpine-redis:3.2.2
-        ports:
-            - "6380:6379"
+  redis_order:
+    image: sickp/alpine-redis:3.2.2
+    ports:
+      - "6380:6379"
+
+  percona_order:
+    image: percona/percona-server:8.0
+    ports:
+      - "3307:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - v-order:/var/lib/mysql
+
+volumes:
+  v-order:
